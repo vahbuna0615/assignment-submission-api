@@ -11,6 +11,10 @@ const options = {
     },
     servers: [
       {
+        url: 'https://assignment-submission-api.onrender.com',
+        description: 'Deployed url'
+      },
+      {
         url: 'http://localhost:3000',
         description: 'Local server'
       }

@@ -14,8 +14,8 @@ Express backend service with MongoDB for managing assignment submissions.
 - To test the API endpoints, visit the [swagger page][Swagger URL].
 - For OAuth login, visit the [base url][Base URL]. On successful login, a Bearer token is returned, which can be used to login in the [swagger page][Swagger URL].
 
-[Base URL]: 
-[Swagger URL]: 
+[Base URL]: https://assignment-submission-api.onrender.com
+[Swagger URL]: https://assignment-submission-api.onrender.com/api-docs
 
 
 ## API Endpoints
