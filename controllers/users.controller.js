@@ -2,6 +2,7 @@ const User = require('../models/users.model');
 const Assignment = require('../models/assignments.model');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const { validationResult } = require('express-validator');
 
 // Generate JWT
 const generateToken = (id) => {
@@ -17,6 +18,14 @@ const generateToken = (id) => {
  */
 
 const registerUser = async(req, res, next) => {
+  const result = validationResult(req)
+  if (!result.isEmpty()) {
+    return res.status(400).json({
+      message: "Validation error",
+      error: result.errors
+    })
+  }
+
   const { name, email, password, role } = req.body;
 
   try {
@@ -57,6 +66,14 @@ const registerUser = async(req, res, next) => {
  */
 
 const loginUser = async (req, res, next) => {
+  const result = validationResult(req)
+  if (!result.isEmpty()) {
+    return res.status(400).json({
+      message: "Validation error",
+      error: result.errors
+    })
+  }
+
   const { email, password } = req.body;
 
   try {
@@ -94,10 +111,24 @@ const loginUser = async (req, res, next) => {
  */
 
 const uploadAssignment = async (req, res, next) => {
+  const result = validationResult(req)
+  if (!result.isEmpty()) {
+    return res.status(400).json({
+      message: "Validation error",
+      error: result.errors
+    })
+  }
 
   const { task, admin } = req.body
 
   try {
+
+    const adminExists = await User.findOne({ id: admin, role: 'admin'})
+
+    if (!adminExists) {
+      res.status(404)
+      throw new Error ('Admin with given id not found')
+    }
 
     const assignment = await Assignment.create({
       user: req.user.id,

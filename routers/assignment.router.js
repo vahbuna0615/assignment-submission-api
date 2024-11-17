@@ -1,9 +1,15 @@
 const express = require('express');
 const { getAssignments, acceptAssignment, rejectAssignment } = require('../controllers/assignment.controller');
 const { isAdmin, isLoggedIn } = require('../middlewares/auth.middleware');
+const { param } = require('express-validator');
 const router = express.Router()
 
 router.use(isLoggedIn)
+
+const idParamValidation = [
+  param('id')
+    .exists().isMongoId().withMessage('must be a valid id string')
+]
 
 /**
  * @swagger
@@ -65,6 +71,8 @@ router.get('/', isAdmin, getAssignments);
  *     responses:
  *      200:
  *        description: Successfully accepts submission
+ *      400:
+ *        description: Validation error
  *      401:
  *        description: Unauthorized access
  *      404:
@@ -72,7 +80,7 @@ router.get('/', isAdmin, getAssignments);
  *      500:
  *        description: Other error
  */
-router.post('/:id/accept', acceptAssignment);
+router.post('/:id/accept', idParamValidation, acceptAssignment);
 
 /**
  * @swagger
@@ -100,6 +108,8 @@ router.post('/:id/accept', acceptAssignment);
  *     responses:
  *      200:
  *        description: Successfully rejects submission
+ *      400:
+ *        description: Validation error
  *      401:
  *        description: Unauthorized access
  *      404:
@@ -107,6 +117,6 @@ router.post('/:id/accept', acceptAssignment);
  *      500:
  *        description: Other error
  */
-router.post('/:id/reject', rejectAssignment);
+router.post('/:id/reject', idParamValidation, rejectAssignment);
 
 module.exports = router
