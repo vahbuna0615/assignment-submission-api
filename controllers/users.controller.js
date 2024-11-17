@@ -12,7 +12,8 @@ const {
   GOOGLE_ACCESS_TOKEN_URL: googleAccessTokenUrl, 
   GOOGLE_CALLBACK_URL: googleCallbackUrl,
   GOOGLE_TOKEN_INFO_URL: googleTokenInfoUrl,
-  GOOGLE_OAUTH_PASS: googleOauthPass, 
+  GOOGLE_OAUTH_PASS: googleOauthPass,
+  JWT_LIFETIME: jwtLifetime, 
   STATE: state,
   BASE_URL: baseUrl
 } = process.env
@@ -20,7 +21,7 @@ const {
 // Generate JWT
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: '30d'
+    expiresIn: jwtLifetime
   })
 }
 
