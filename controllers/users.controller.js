@@ -3,6 +3,19 @@ const Assignment = require('../models/assignments.model');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { validationResult } = require('express-validator');
+require('dotenv').config();
+
+const {  
+  GOOGLE_OAUTH_URL: googleOauthUrl, 
+  GOOGLE_CLIENT_ID: googleClientId, 
+  GOOGLE_CLIENT_SECRET: googleClientSecret,
+  GOOGLE_ACCESS_TOKEN_URL: googleAccessTokenUrl, 
+  GOOGLE_CALLBACK_URL: googleCallbackUrl,
+  GOOGLE_TOKEN_INFO_URL: googleTokenInfoUrl,
+  GOOGLE_OAUTH_PASS: googleOauthPass, 
+  STATE: state,
+  BASE_URL: baseUrl
+} = process.env
 
 // Generate JWT
 const generateToken = (id) => {
@@ -145,12 +158,78 @@ const uploadAssignment = async (req, res, next) => {
 
 const getAllAdmins = async (req, res, next) => {
   try {
-    const allAdmins = await User.find({
-      role: 'admin'
-    })
+    const allAdmins = await User.find({ role: 'admin' }).select('-password');
 
     return res.status(200).json(allAdmins);
   } catch(err) {
+    next(err)
+  }
+}
+
+// OAuth Implementation
+
+const oauthRedirect = (req, res, next) => {
+  const googleOauthScopes = [
+    "https%3A//www.googleapis.com/auth/userinfo.email",
+    "https%3A//www.googleapis.com/auth/userinfo.profile",
+  ]
+
+  const scopes = googleOauthScopes.join(" ");
+
+  const googleOauthConsentScreenUrl = `${googleOauthUrl}?client_id=${googleClientId}&redirect_uri=${googleCallbackUrl}&access_type=offline&response_type=code&state=${state}&scope=${scopes}`;
+
+  try {
+    res.redirect(googleOauthConsentScreenUrl)
+  } catch (err) {
+    next(err)
+  }
+}
+
+const oauthCallback = async (req, res, next) => {
+
+  const { code } = req.query;
+
+  const data = {
+    code,
+    client_id: googleClientId,
+    client_secret: googleClientSecret,
+    redirect_uri: `${baseUrl}/google/callback`,
+    grant_type: "authorization_code"
+  }
+
+  try {
+
+    // exchange authorization code for access token & id_token
+    const response = await fetch(googleAccessTokenUrl, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+
+    const access_token_data = await response.json()
+
+    const { id_token } = access_token_data;
+
+    // verify and extract the information in the id token
+    const token_info_response = await fetch(
+      `${googleTokenInfoUrl}?id_token=${id_token}`
+    )
+
+    const token_info_data = await token_info_response.json();
+
+    // check if the user exists, if not then create new user
+
+    const { email, name } = token_info_data;
+    let user = await User.findOne({ email }).select("-pasword");
+    if (!user) {
+      user = await User.create({ email, name, password: googleOauthPass }) 
+    }
+
+    const token = generateToken(user.id);
+    res.status(token_info_response.status).json({
+      user,
+      token
+    })
+  } catch (err) {
     next(err)
   }
 }
@@ -160,5 +239,7 @@ module.exports = {
   registerUser,
   loginUser,
   uploadAssignment,
-  getAllAdmins
+  getAllAdmins,
+  oauthRedirect,
+  oauthCallback
 }

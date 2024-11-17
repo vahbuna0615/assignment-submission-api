@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const { isLoggedIn } = require('../middlewares/auth.middleware');
-const { loginUser, registerUser, getAllAdmins, uploadAssignment } = require('../controllers/users.controller');
+const { loginUser, registerUser, getAllAdmins, uploadAssignment, oauthRedirect, oauthCallback } = require('../controllers/users.controller');
 const { body } = require('express-validator');
 
 const loginUserValidation = [
@@ -211,5 +211,11 @@ router.post('/upload', isLoggedIn, uploadAssignmentValidation, uploadAssignment)
  *        description: Other error
  */
 router.get('/admins', isLoggedIn, getAllAdmins);
+
+// redirects to oauth consent screen
+router.get('/', oauthRedirect);
+
+// handles oauth callback
+router.get('/google/callback', oauthCallback);
 
 module.exports = router;

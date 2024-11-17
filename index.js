@@ -6,17 +6,22 @@ const { swaggerUi, specs } = require('./helpers/swagger');
 const { errorHandler } = require('./middlewares/error.middleware');
 require('dotenv').config();
 
+const port = process.env.PORT;
+
 connectToDB()
 
 const app = express()
 
 app.use(express.json())
 
+// Swagger documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs))
 
+// API routes
 app.use('/', userRouter)
 app.use('/assignments', assignmentRouter)
 
+// Error handling middleware
 app.use(errorHandler)
 
-app.listen(3000)
+app.listen(port)
