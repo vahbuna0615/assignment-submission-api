@@ -137,7 +137,7 @@ const uploadAssignment = async (req, res, next) => {
 
   try {
 
-    const adminExists = await User.findOne({ id: admin, role: 'admin'})
+    const adminExists = await User.findOne({ _id: admin, role: 'admin'})
 
     if (!adminExists) {
       res.status(404)
