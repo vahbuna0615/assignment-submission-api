@@ -52,14 +52,6 @@ const uploadAssignmentValidation = [
  *  paths:
  *   /register:
  *    post:
- *     components:
- *      securitySchemes:
- *        bearerAuth:
- *          type: http
- *          scheme: bearer
- *          bearerFormat: JWT
- *     security:
- *      - bearerAuth: []
  *     tags: [Users]
  *     summary: Register new user
  *     description: Registers a new user
@@ -101,14 +93,6 @@ router.post('/register', registerUserValidation, registerUser)
  *  paths:
  *   /login:
  *    post:
- *     components:
- *      securitySchemes:
- *        bearerAuth:
- *          type: http
- *          scheme: bearer
- *          bearerFormat: JWT
- *     security:
- *      - bearerAuth: []
  *     tags: [Users]
  *     summary: Authenticates user
  *     description: Login for existing users
